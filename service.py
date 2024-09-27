@@ -168,7 +168,7 @@ def run_async_update_asset_type_properties(task_id, asset_type_id):
 
 @app.route('/updateAssetTypeProperties/<asset_type_id>', methods=['GET','OPTIONS'])
 def trigger_task(asset_type_id):
-     if request.method == "OPTIONS": # CORS preflight
+    if request.method == "OPTIONS": # CORS preflight
         return _build_cors_preflight_response()
     elif request.method == "GET": # The actual request following the preflight
         task_id = str(uuid.uuid4())  # Generate a unique task ID
@@ -183,7 +183,7 @@ def trigger_task(asset_type_id):
 
 @app.route('/task-status/<task_id>', methods=['GET','OPTIONS'])
 def task_status(task_id):
-     if request.method == "OPTIONS": # CORS preflight
+    if request.method == "OPTIONS": # CORS preflight
         return _build_cors_preflight_response()
     elif request.method == "GET": # The actual request following the preflight
         status = tasks.get(task_id, "unknown")  # Get the task status
