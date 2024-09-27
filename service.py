@@ -166,17 +166,33 @@ def run_async_update_asset_type_properties(task_id, asset_type_id):
     loop.run_until_complete(update_asset_type_properties(task_id, asset_type_id))
     loop.close()
 
-@app.route('/updateAssetTypeProperties/<asset_type_id>', methods=['GET'])
+@app.route('/updateAssetTypeProperties/<asset_type_id>', methods=['GET','OPTIONS'])
 def trigger_task(asset_type_id):
-    task_id = str(uuid.uuid4())  # Generate a unique task ID
-    tasks[task_id] = "in-progress"  # Mark task as in progress
-    executor.submit(run_async_update_asset_type_properties, task_id, asset_type_id)
-    return jsonify({"message": "Task triggered", "task_id": task_id}), 200
+     if request.method == "OPTIONS": # CORS preflight
+        return _build_cors_preflight_response()
+    elif request.method == "GET": # The actual request following the preflight
+        task_id = str(uuid.uuid4())  # Generate a unique task ID
+        tasks[task_id] = "in-progress"  # Mark task as in progress
+        executor.submit(run_async_update_asset_type_properties, task_id, asset_type_id)
+        response = make_response()
+        #add data to response
+        response.headers.add('Content-Type', 'application/json')
+        response.status_code = 200
+        response = jsonify({"message": "Task triggered", "task_id": task_id})
+        return _corsify_actual_response(response)
 
-@app.route('/task-status/<task_id>', methods=['GET'])
+@app.route('/task-status/<task_id>', methods=['GET','OPTIONS'])
 def task_status(task_id):
-    status = tasks.get(task_id, "unknown")  # Get the task status
-    return jsonify({"task_id": task_id, "status": status}), 200
+     if request.method == "OPTIONS": # CORS preflight
+        return _build_cors_preflight_response()
+    elif request.method == "GET": # The actual request following the preflight
+        status = tasks.get(task_id, "unknown")  # Get the task status
+        response = make_response()
+        #add data to response
+        response.headers.add('Content-Type', 'application/json')
+        response.status_code = 200
+        response = jsonify({"task_id": task_id, "status": status})
+        return _corsify_actual_response(response)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
