@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, jsonify, make_response
+from flask import Flask, jsonify, request, jsonify, make_response, abort, Response
 from datetime import datetime
 import requests
 import math
@@ -193,6 +193,34 @@ def task_status(task_id):
         response.status_code = 200
         response = jsonify({"task_id": task_id, "status": status})
         return _corsify_actual_response(response)
+    
+@app.route("/calendar.ics")
+def get_calendar():
+    accountid = request.args.get("accountid")
+    if not accountid:
+        abort(400, "Missing accountid parameter")
+
+    url = "https://api.knack.com/v1/scenes/scene_350/views/view_611/records/applications/63702b9fb7752900212c987e/calendar.ics"
+    params = {
+        "account-details_id": accountid
+    }
+
+    headers = {
+        "Content-Type": "text/calendar",
+        "Accept": "*/*",
+        # If needed, add Knack API headers:
+        # "X-Knack-Application-Id": "your_app_id",
+        # "X-Knack-REST-API-Key": "your_api_key"
+    }
+
+    try:
+        r = requests.get(url, params=params, headers=headers)
+        r.raise_for_status()
+    except requests.RequestException as e:
+        abort(502, f"Upstream error: {str(e)}")
+
+    return Response(r.content, mimetype="text/calendar")
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
