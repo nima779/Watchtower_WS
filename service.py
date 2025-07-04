@@ -200,7 +200,7 @@ def get_calendar():
     if not accountid:
         abort(400, "Missing accountid parameter")
 
-    url = "https://api.knack.com/v1/scenes/scene_350/views/view_611/records/applications/63702b9fb7752900212c987e/calendar.ics"
+    url = "https://api.knack.com/v1/scenes/scene_350/views/view_800/records/applications/63702b9fb7752900212c987e/calendar.ics"
     params = {
         "account-details_id": accountid
     }
